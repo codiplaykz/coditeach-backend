@@ -12,23 +12,14 @@ import (
 	"time"
 )
 
-const SecretKey = "secret"
+const (
+	SecretKey  = "Secret"
+	authHeader = "Authorization"
+	userCtx    = "userId"
+)
 
 var userDAO = dao.UserDAO{Logger: logmatic.NewLogger()}
 var logger = logmatic.NewLogger()
-
-type SwaggerSignUpRequest struct {
-	Login    string
-	Role     string
-	Password string
-	Name     string
-	Surname  string
-	Email    string
-}
-type SwaggerSignUpResponse struct {
-	userData interface{}
-	tokens   interface{}
-}
 
 func SignUp(c *fiber.Ctx) error {
 	//Get data of user
@@ -190,6 +181,52 @@ func Refresh(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusUnauthorized)
 }
 
+func UserIdentifyMiddleware(c *fiber.Ctx) error {
+	headers := c.GetReqHeaders()
+	token := headers[authHeader]
+
+	if token == "" {
+		c.Status(401)
+		return c.JSON(fiber.Map{"error": "empty auth header"})
+	}
+
+	isAuthorized, userId := CheckToken(token)
+
+	if isAuthorized {
+		fmt.Println(userId)
+	} else {
+		c.Status(401)
+		return c.JSON(fiber.Map{"error": "invalid auth header"})
+	}
+
+	return c.Next()
+}
+
+func CheckToken(userToken string) (bool, int) {
+	token, err := jwt.Parse(userToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(SecretKey), nil
+	})
+
+	if err != nil {
+		return false, -1
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if _, ok := claims["iss"]; ok {
+			id, err := strconv.Atoi(claims["iss"].(string))
+			if err != nil {
+				return false, -1
+			}
+			return true, id
+		}
+	}
+	return false, -1
+}
+
 func generateTokenPair(userId int) fiber.Map {
 	//Creating jwt token
 	accessClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
@@ -198,7 +235,7 @@ func generateTokenPair(userId int) fiber.Map {
 	})
 
 	refreshClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    strconv.Itoa(userId),
+		//Issuer:    strconv.Itoa(userId),
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), //1 day
 	})
 

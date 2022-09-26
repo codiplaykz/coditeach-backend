@@ -6,8 +6,16 @@ import (
 )
 
 func Setup(app *fiber.App) {
-	//Authorization routes
-	app.Post("api/v1/auth/sign_up", controllers.SignUp)
-	app.Post("api/v1/auth/sign_in", controllers.SignIn)
-	app.Post("api/v1/auth/refresh", controllers.Refresh)
+	api := app.Group("/api")
+
+	v1 := api.Group("/v1")
+
+	auth := v1.Group("/auth")
+	{
+		//Authorization routes
+		auth.Post("/sign_up", controllers.SignUp)
+		auth.Post("/sign_in", controllers.SignIn)
+		auth.Post("/refresh", controllers.Refresh)
+	}
+
 }
