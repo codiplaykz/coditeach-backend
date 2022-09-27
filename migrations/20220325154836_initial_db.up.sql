@@ -20,39 +20,6 @@ CREATE TABLE IF NOT EXISTS USERS(
    email text unique not null
 );
 
--- Curriculum tables
-CREATE TABLE IF NOT EXISTS CURRICULUMS (
-    id serial not null primary key,
-    teacher_id serial references teachers (id),
-    title text not null,
-    description text not null,
-    created_at timestamp not null
-);
-
-CREATE TABLE IF NOT EXISTS MODULES (
-    id serial not null primary key,
-    curriculum_id serial references CURRICULUMS (id),
-    title text not null,
-    description text not null,
-    created_at timestamp not null
-);
-
-CREATE TABLE IF NOT EXISTS BLOCKS (
-    id serial not null primary key,
-    module_id serial references MODULES (id),
-    title text not null,
-    created_at timestamp not null
-);
-
-CREATE TABLE IF NOT EXISTS CURRICULUM_LESSONS (
-    id serial not null primary key,
-    block_id serial references BLOCKS (id),
-    title text not null,
-    description text not null,
-    type text not null,
-    content text not null,
-    created_at timestamp not null
-);
 
 -- Education tables
 CREATE TABLE IF NOT EXISTS SCHOOLS (
@@ -117,12 +84,12 @@ CREATE TABLE IF NOT EXISTS SCHEDULE_LESSONS(
 );
 
 CREATE TABLE IF NOT EXISTS TESTS(
-    id serial primary key,
-    name text not null,
-    description text not null,
-    duration int not null,
-    created_at timestamp not null,
-    teacher_id serial references teachers (id)
+id serial primary key,
+name text not null,
+description text not null,
+duration int not null,
+created_at timestamp not null,
+teacher_id serial references teachers (id)
 );
 
 CREATE TABLE IF NOT EXISTS QUESTIONS(
@@ -189,3 +156,38 @@ CREATE TABLE IF NOT EXISTS STATISTICS (
     information text not null,
     created_at date not null
 );
+
+-- Curriculum tables
+CREATE TABLE IF NOT EXISTS CURRICULUMS (
+    id serial not null primary key,
+    teacher_id serial references teachers (id),
+    title text not null,
+    description text not null,
+    created_at timestamp not null
+);
+
+CREATE TABLE IF NOT EXISTS MODULES (
+    id serial not null primary key,
+    curriculum_id serial references CURRICULUMS (id),
+    title text not null,
+    description text not null,
+    created_at timestamp not null
+);
+
+CREATE TABLE IF NOT EXISTS BLOCKS (
+    id serial not null primary key,
+    module_id serial references MODULES (id),
+    title text not null,
+    created_at timestamp not null
+);
+
+CREATE TABLE IF NOT EXISTS CURRICULUM_LESSONS (
+    id serial not null primary key,
+    block_id serial references BLOCKS (id),
+    title text not null,
+    description text not null,
+    type text not null,
+    content text not null,
+    created_at timestamp not null
+);
+
