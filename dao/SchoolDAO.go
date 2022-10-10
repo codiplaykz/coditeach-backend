@@ -2,6 +2,7 @@ package dao
 
 import (
 	"coditeach/database"
+	"coditeach/helpers"
 	"coditeach/models"
 	"context"
 	"github.com/jackc/pgx/v4"
@@ -86,4 +87,28 @@ func (c *SchoolDAO) GetById(school *models.School) error {
 	}
 
 	return nil
+}
+
+func (c *SchoolDAO) GetAll() ([]map[string]interface{}, error) {
+	rows, err := database.DB.Query(context.Background(),
+		"select * from schools")
+
+	if err != nil {
+		c.Logger.Error("Could not get schools")
+		return nil, err
+	}
+
+	json := helpers.PgSqlRowsToJson(rows)
+
+	if err == pgx.ErrNoRows {
+		c.Logger.Error("Schools not found")
+		return nil, err
+	}
+
+	if err != nil {
+		c.Logger.Error("Unable to get schools")
+		return nil, err
+	}
+
+	return json, nil
 }

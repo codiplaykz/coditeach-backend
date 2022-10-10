@@ -9,12 +9,13 @@ require (
 	github.com/jackc/pgx/v4 v4.15.0
 	github.com/joho/godotenv v1.4.0
 	github.com/mborders/logmatic v0.4.0
-	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
+	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/fatih/color v1.7.0 // indirect
+	github.com/georgysavva/scany/v2 v2.0.0-alpha.2 // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.0 // indirect

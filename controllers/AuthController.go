@@ -15,7 +15,7 @@ import (
 const (
 	SecretKey  = "Secret"
 	authHeader = "Authorization"
-	userCtx    = "userId"
+	//userCtx    = "userId"
 )
 
 var userDAO = dao.UserDAO{Logger: logmatic.NewLogger()}
@@ -193,7 +193,7 @@ func UserIdentifyMiddleware(c *fiber.Ctx) error {
 	isAuthorized, userId := CheckToken(token)
 
 	if isAuthorized {
-		fmt.Println(userId)
+		c.Set("userId", string(userId))
 	} else {
 		c.Status(401)
 		return c.JSON(fiber.Map{"error": "invalid auth header"})

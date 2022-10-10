@@ -40,17 +40,6 @@ func CreateSchool(c *fiber.Ctx) error {
 	return c.JSON(result)
 }
 
-// @Summary      delete school
-// @Tags         school
-// @Description  delete school
-// @ID           delete-school
-// @Accept       json
-// @Produce      json
-// @Param        id   query     number  true  "school id"
-// @Success      200  {object}  object{message=string}
-// @Failure      500   {object}  object{message=string}
-// @Failure      404  {object}  object{message=string}
-// @Router       /api/school/delete [delete]
 func DeleteSchool(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Query("id"))
 
@@ -82,17 +71,6 @@ func DeleteSchool(c *fiber.Ctx) error {
 	})
 }
 
-// @Summary      update school
-// @Tags         school
-// @Description  update school
-// @ID           update-school
-// @Accept       json
-// @Produce      json
-// @Param        input body object{id=number,name=string,location=string} true "school info"
-// @Success      202   {object}  object{id=number,name=string,location=string}
-// @Failure      500    {object}  object{message=string}
-// @Failure      404   {object}  object{message=string}
-// @Router       /api/school/update [put]
 func UpdateSchool(c *fiber.Ctx) error {
 	school := new(models.School)
 
@@ -130,17 +108,6 @@ func UpdateSchool(c *fiber.Ctx) error {
 	return c.JSON(result)
 }
 
-// @Summary      get school
-// @Tags         school
-// @Description  get school
-// @ID           get-school
-// @Accept       json
-// @Produce      json
-// @Param        id   query     number  true  "school id"
-// @Success      200   {object}  object{id=number,name=string,location=string}
-// @Failure      500    {object}  object{message=string}
-// @Failure      404   {object}  object{message=string}
-// @Router       /api/school/get [get]
 func GetSchool(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Query("id"))
 
@@ -174,4 +141,19 @@ func GetSchool(c *fiber.Ctx) error {
 
 	c.Status(fiber.StatusOK)
 	return c.JSON(result)
+}
+
+func GetAllSchools(c *fiber.Ctx) error {
+	schools, err := schoolDAO.GetAll()
+
+	if err != nil {
+		logger.Error("ERROR: %s", err)
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(fiber.Map{
+			"message": "Unable to get schools, try later.",
+		})
+	}
+
+	c.Status(fiber.StatusOK)
+	return c.JSON(&schools)
 }

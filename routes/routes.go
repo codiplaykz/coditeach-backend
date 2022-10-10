@@ -56,6 +56,7 @@ func Setup(app *fiber.App) {
 				//School routes
 				schools.Post("/create", controllers.CreateSchool)
 				schools.Get("/get", controllers.GetSchool)
+				schools.Get("/getAll", controllers.GetAllSchools)
 				schools.Put("/update", controllers.UpdateSchool)
 				schools.Delete("/delete", controllers.DeleteSchool)
 			}

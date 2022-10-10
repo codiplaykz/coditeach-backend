@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Block struct {
 	Id         uint      `json:"id"`
