@@ -268,3 +268,18 @@ func RegisterStudentAccount(c *fiber.Ctx) error {
 	c.Status(fiber.StatusCreated)
 	return c.JSON(student)
 }
+
+func GetAllStudents(c *fiber.Ctx) error {
+	students, err := studentDAO.GetAll()
+
+	if err != nil {
+		logger.Error("ERROR: %s", err)
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(fiber.Map{
+			"message": "Unable to get students, try later.",
+		})
+	}
+
+	c.Status(fiber.StatusOK)
+	return c.JSON(&students)
+}

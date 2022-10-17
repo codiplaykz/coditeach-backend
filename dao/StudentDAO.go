@@ -2,6 +2,7 @@ package dao
 
 import (
 	"coditeach/database"
+	"coditeach/helpers"
 	"coditeach/models"
 	"context"
 	"errors"
@@ -96,6 +97,30 @@ func (s *StudentDAO) GetById(student *models.Student) error {
 	}
 
 	return nil
+}
+
+func (s *StudentDAO) GetAll() ([]map[string]interface{}, error) {
+	rows, err := database.DB.Query(context.Background(),
+		"select * from students")
+
+	if err != nil {
+		s.Logger.Error("Could not get students")
+		return nil, err
+	}
+
+	json := helpers.PgSqlRowsToJson(rows)
+
+	if err == pgx.ErrNoRows {
+		s.Logger.Error("Students not found")
+		return nil, err
+	}
+
+	if err != nil {
+		s.Logger.Error("Unable to get students")
+		return nil, err
+	}
+
+	return json, nil
 }
 
 func (s *StudentDAO) CreateAccount(account *StudentAccount) error {

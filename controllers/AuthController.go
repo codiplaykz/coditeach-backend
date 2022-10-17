@@ -202,6 +202,42 @@ func UserIdentifyMiddleware(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+func AdminIdentifyMiddleware(c *fiber.Ctx) error {
+	headers := c.GetReqHeaders()
+	token := headers[authHeader]
+
+	if token == "" {
+		c.Status(401)
+		return c.JSON(fiber.Map{"error": "empty auth header"})
+	}
+
+	isAuthorized, userId := CheckToken(token)
+
+	if isAuthorized {
+		user := models.User{Id: uint(userId)}
+
+		err := userDAO.GetById(&user)
+
+		if err != nil {
+			logger.Error("ERROR: %s", err)
+			c.Status(fiber.StatusInternalServerError)
+			return c.JSON(fiber.Map{
+				"message": "Invalid user.",
+			})
+		}
+
+		if user.Role != "admin" {
+			c.Status(401)
+			return c.JSON(fiber.Map{"error": "invalid auth user"})
+		}
+	} else {
+		c.Status(401)
+		return c.JSON(fiber.Map{"error": "invalid auth header"})
+	}
+
+	return c.Next()
+}
+
 func CheckToken(userToken string) (bool, int) {
 	token, err := jwt.Parse(userToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -235,7 +271,7 @@ func generateTokenPair(userId int) fiber.Map {
 	})
 
 	refreshClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		//Issuer:    strconv.Itoa(userId),
+		Issuer:    strconv.Itoa(userId),
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), //1 day
 	})
 

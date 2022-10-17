@@ -18,6 +18,11 @@ func Setup(app *fiber.App) {
 				auth.Post("/refresh", controllers.Refresh)
 			}
 
+			admin := v1.Group("/admin", controllers.UserIdentifyMiddleware, controllers.AdminIdentifyMiddleware)
+			{
+				admin.Get("/getAll/students", controllers.GetAllStudents)
+			}
+
 			curriculum := v1.Group("/curriculum", controllers.UserIdentifyMiddleware)
 			{
 				//Curriculum routes
