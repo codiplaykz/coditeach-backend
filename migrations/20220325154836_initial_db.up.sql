@@ -122,19 +122,18 @@ CREATE TABLE IF NOT EXISTS EVENTS (
     date timestamp not null
 );
 
-CREATE TABLE IF NOT EXISTS BLOCK_CODES (
-    id serial primary key,
-    name text not null ,
-    description text not null,
-    code text not null
-);
-
 CREATE TABLE IF NOT EXISTS PROJECTS(
     id serial primary key,
     name text not null,
+    type text not null,
+    level text not null,
     description text not null,
-    scheme_id serial,
-    block_code_id serial references block_codes (id)
+    tech_components text not null,
+    creator_Id serial references users (id),
+    source_code text not null,
+    block_code text not null,
+    cover_img_url text not null,
+    scheme_img_url text not null
 );
 
 CREATE TABLE IF NOT EXISTS STUDENT_PROJECTS(

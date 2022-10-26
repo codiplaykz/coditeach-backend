@@ -24,6 +24,11 @@ func Setup(app *fiber.App) {
 				admin.Get("/getAll/teachers", controllers.GetAllTeachers)
 			}
 
+			projects := v1.Group("/project", controllers.UserIdentifyMiddleware)
+			{
+				projects.Post("/create", controllers.CreateProject)
+			}
+
 			curriculum := v1.Group("/curriculum", controllers.UserIdentifyMiddleware)
 			{
 				//Curriculum routes
