@@ -21,6 +21,7 @@ func Setup(app *fiber.App) {
 			admin := v1.Group("/admin", controllers.UserIdentifyMiddleware, controllers.AdminIdentifyMiddleware)
 			{
 				admin.Get("/getAll/students", controllers.GetAllStudents)
+				admin.Get("/getAll/teachers", controllers.GetAllTeachers)
 			}
 
 			curriculum := v1.Group("/curriculum", controllers.UserIdentifyMiddleware)
