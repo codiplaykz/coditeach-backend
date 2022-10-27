@@ -129,6 +129,8 @@ CREATE TABLE IF NOT EXISTS PROJECTS(
     level text not null,
     description text not null,
     tech_components text not null,
+    duration int not null,
+    purchase_box_link text not null,
     creator_Id serial references users (id),
     source_code text not null,
     block_code text not null,
