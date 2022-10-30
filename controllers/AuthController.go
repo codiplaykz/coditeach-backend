@@ -172,7 +172,7 @@ func Refresh(c *fiber.Ctx) error {
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		id, err := strconv.Atoi(claims["iss"].(string))
 		if err != nil {
-			return nil
+			return err
 		}
 		c.Status(fiber.StatusOK)
 		return c.JSON(generateTokenPair(id))

@@ -1,5 +1,5 @@
 -- Auth tables
-CREATE TABLE IF NOT EXISTS ROLES(
+CREATE TABLE IFsNOT EXISTS ROLES(
     id SERIAL PRIMARY KEY,
     name text not null
 );

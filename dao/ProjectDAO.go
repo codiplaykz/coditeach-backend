@@ -50,3 +50,33 @@ func (p *ProjectDAO) GetAll() ([]map[string]interface{}, error) {
 
 	return json, nil
 }
+
+func (p *ProjectDAO) GetById(project *models.Project) error {
+	err := database.DB.QueryRow(context.Background(),
+		"select * from projects where id=$1",
+		project.Id).Scan(&project.Id,
+		&project.Name,
+		&project.Type,
+		&project.Level,
+		&project.Description,
+		&project.Tech_components,
+		&project.Duration,
+		&project.Purchase_box_link,
+		&project.Creator_Id,
+		&project.Source_Code,
+		&project.Block_code,
+		&project.Cover_img_url,
+		&project.Scheme_img_url)
+
+	if err == pgx.ErrNoRows {
+		p.Logger.Error("Project not found")
+		return err
+	}
+
+	if err != nil {
+		p.Logger.Error("Unable to get project with id: %v.", project.Id)
+		return err
+	}
+
+	return nil
+}

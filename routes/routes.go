@@ -27,6 +27,7 @@ func Setup(app *fiber.App) {
 			projects := v1.Group("/project", controllers.UserIdentifyMiddleware)
 			{
 				projects.Post("/create", controllers.CreateProject)
+				projects.Get("/get", controllers.GetProjectById)
 				projects.Get("/getAll", controllers.GetAllProjects)
 			}
 

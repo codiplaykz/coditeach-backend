@@ -5,6 +5,7 @@ import (
 	"coditeach/helpers"
 	"coditeach/models"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v4"
 	"github.com/mborders/logmatic"
 	"github.com/rs/xid"
 	"path/filepath"
@@ -99,4 +100,33 @@ func GetAllProjects(c *fiber.Ctx) error {
 
 	c.Status(fiber.StatusOK)
 	return c.JSON(&projects)
+}
+
+func GetProjectById(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Query("id"))
+
+	project := models.Project{
+		Id: uint(id),
+	}
+
+	err = projectDAO.GetById(&project)
+
+	if err == pgx.ErrNoRows {
+		logger.Error("ERROR: %s", err)
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"message": "Project not found.",
+		})
+	}
+
+	if err != nil {
+		logger.Error("ERROR: %s", err)
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(fiber.Map{
+			"message": "Unable to get project, try later.",
+		})
+	}
+
+	c.Status(fiber.StatusOK)
+	return c.JSON(project)
 }
