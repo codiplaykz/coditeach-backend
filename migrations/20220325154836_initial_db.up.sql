@@ -20,13 +20,18 @@ CREATE TABLE IF NOT EXISTS USERS(
    email text unique not null
 );
 
-
 -- Education tables
 CREATE TABLE IF NOT EXISTS SCHOOLS (
     id serial primary key,
     name text not null,
     location text not null,
     expiration_date date not null
+);
+
+CREATE TABLE IF NOT EXISTS SCHOOL_ADMINS (
+    id SERIAL PRIMARY KEY,
+    user_id SERIAL REFERENCES USERS(id),
+    school_id SERIAL REFERENCES SCHOOLS(id)
 );
 
 CREATE TABLE IF NOT EXISTS TEACHERS(

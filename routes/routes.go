@@ -68,8 +68,10 @@ func Setup(app *fiber.App) {
 			{
 				//School routes
 				schools.Post("/create", controllers.CreateSchool)
+				schools.Post("/create_school_admin", controllers.CreateSchoolAdminAccount)
 				schools.Get("/get", controllers.GetSchool)
 				schools.Get("/getAll", controllers.GetAllSchools)
+				schools.Get("/getAllSchoolAdmins", controllers.GetSchoolAdmins)
 				schools.Put("/update", controllers.UpdateSchool)
 				schools.Delete("/delete", controllers.DeleteSchool)
 			}

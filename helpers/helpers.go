@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/jackc/pgx/v4"
+	"gopkg.in/gomail.v2"
 	"mime/multipart"
 )
 
@@ -73,4 +74,22 @@ func UploadImageToSpace(filename string, file multipart.File) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+}
+
+func SendEmail(to, subject, htmlString string) error {
+	m := gomail.NewMessage()
+	m.SetHeader("From", "coditeach.platform@gmail.com")
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html", htmlString)
+
+	d := gomail.NewDialer("smtp.gmail.com", 587, "coditeach.platform@gmail.com", "fkgxwthqkxrtqlmo")
+
+	// Send the email
+	if err := d.DialAndSend(m); err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
 }
