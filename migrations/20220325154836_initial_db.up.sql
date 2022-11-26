@@ -1,5 +1,5 @@
 -- Auth tables
-CREATE TABLE IFsNOT EXISTS ROLES(
+CREATE TABLE IF NOT EXISTS ROLES(
     id SERIAL PRIMARY KEY,
     name text not null
 );
@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS USERS(
 CREATE TABLE IF NOT EXISTS SCHOOLS (
     id serial primary key,
     name text not null,
-    location text not null
+    location text not null,
+    expiration_date date not null
 );
 
 CREATE TABLE IF NOT EXISTS TEACHERS(
@@ -84,12 +85,12 @@ CREATE TABLE IF NOT EXISTS SCHEDULE_LESSONS(
 );
 
 CREATE TABLE IF NOT EXISTS TESTS(
-id serial primary key,
-name text not null,
-description text not null,
-duration int not null,
-created_at timestamp not null,
-teacher_id serial references teachers (id)
+    id serial primary key,
+    name text not null,
+    description text not null,
+    duration int not null,
+    created_at timestamp not null,
+    teacher_id serial references teachers (id)
 );
 
 CREATE TABLE IF NOT EXISTS QUESTIONS(
@@ -142,7 +143,7 @@ CREATE TABLE IF NOT EXISTS STUDENT_PROJECTS(
     id serial primary key,
     name text not null,
     project_id serial references projects(id),
-    created_at date not null
+    created_at timestamp not null
 );
 
 CREATE TABLE IF NOT EXISTS REPORTS(

@@ -30,14 +30,8 @@ func CreateSchool(c *fiber.Ctx) error {
 		})
 	}
 
-	result := fiber.Map{
-		"id":       school.Id,
-		"name":     school.Name,
-		"location": school.Location,
-	}
-
 	c.Status(fiber.StatusCreated)
-	return c.JSON(result)
+	return c.JSON(school)
 }
 
 func DeleteSchool(c *fiber.Ctx) error {
@@ -98,14 +92,8 @@ func UpdateSchool(c *fiber.Ctx) error {
 		})
 	}
 
-	result := fiber.Map{
-		"id":       school.Id,
-		"name":     school.Name,
-		"location": school.Location,
-	}
-
 	c.Status(fiber.StatusAccepted)
-	return c.JSON(result)
+	return c.JSON(school)
 }
 
 func GetSchool(c *fiber.Ctx) error {
@@ -133,14 +121,8 @@ func GetSchool(c *fiber.Ctx) error {
 		})
 	}
 
-	result := fiber.Map{
-		"id":       school.Id,
-		"name":     school.Name,
-		"location": school.Location,
-	}
-
 	c.Status(fiber.StatusOK)
-	return c.JSON(result)
+	return c.JSON(school)
 }
 
 func GetAllSchools(c *fiber.Ctx) error {

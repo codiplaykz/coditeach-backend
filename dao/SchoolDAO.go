@@ -15,9 +15,10 @@ type SchoolDAO struct {
 
 func (c *SchoolDAO) Create(school *models.School) error {
 	err := database.DB.QueryRow(context.Background(),
-		"insert into schools (name, location) VALUES($1,$2) returning id",
+		"insert into schools (name, location, license_expiration_date) VALUES($1,$2,$3) returning id",
 		school.Name,
-		school.Location).Scan(&school.Id)
+		school.Location,
+		school.License_expiration_date).Scan(&school.Id)
 
 	if err != nil {
 		c.Logger.Error("Unable to create school.")
@@ -31,9 +32,10 @@ func (c *SchoolDAO) Create(school *models.School) error {
 
 func (c *SchoolDAO) Update(school *models.School) error {
 	err := database.DB.QueryRow(context.Background(),
-		"update schools set name=$1, location=$2 where id=$3 returning id",
+		"update schools set name=$1, location=$2, license_expiration_date=$3 where id=$4 returning id",
 		school.Name,
 		school.Location,
+		school.License_expiration_date,
 		school.Id).Scan(&school.Id)
 
 	if err == pgx.ErrNoRows {
@@ -74,7 +76,7 @@ func (c *SchoolDAO) GetById(school *models.School) error {
 		"select * from schools where id=$1",
 		school.Id)
 
-	err := row.Scan(&school.Id, &school.Name, &school.Location)
+	err := row.Scan(&school.Id, &school.Name, &school.Location, &school.License_expiration_date)
 
 	if err == pgx.ErrNoRows {
 		c.Logger.Error("School not found")

@@ -152,6 +152,7 @@ func SignIn(c *fiber.Ctx) error {
 func Refresh(c *fiber.Ctx) error {
 	//Get token
 	var data map[string]string
+	fmt.Println("Call to refresh")
 
 	err := c.BodyParser(&data)
 
@@ -178,7 +179,10 @@ func Refresh(c *fiber.Ctx) error {
 		return c.JSON(generateTokenPair(id))
 	}
 
-	return c.SendStatus(fiber.StatusUnauthorized)
+	c.Status(fiber.StatusUnauthorized)
+	return c.JSON(fiber.Map{
+		"error": "invalid user",
+	})
 }
 
 func UserIdentifyMiddleware(c *fiber.Ctx) error {
@@ -195,7 +199,7 @@ func UserIdentifyMiddleware(c *fiber.Ctx) error {
 	if isAuthorized {
 		c.Set("userId", string(userId))
 	} else {
-		c.Status(401)
+		c.Status(fiber.StatusUnauthorized)
 		return c.JSON(fiber.Map{"error": "invalid auth header"})
 	}
 
@@ -222,16 +226,16 @@ func AdminIdentifyMiddleware(c *fiber.Ctx) error {
 			logger.Error("ERROR: %s", err)
 			c.Status(fiber.StatusInternalServerError)
 			return c.JSON(fiber.Map{
-				"message": "Invalid user.",
+				"message": "oops... try later. server error 500",
 			})
 		}
 
 		if user.Role != "admin" {
-			c.Status(401)
-			return c.JSON(fiber.Map{"error": "invalid auth user"})
+			c.Status(fiber.StatusUnauthorized)
+			return c.JSON(fiber.Map{"error": "not admin"})
 		}
 	} else {
-		c.Status(401)
+		c.Status(fiber.StatusUnauthorized)
 		return c.JSON(fiber.Map{"error": "invalid auth header"})
 	}
 
