@@ -290,3 +290,47 @@ func CreateSchoolAdminAccount(c *fiber.Ctx) error {
 		"message": "School admin account created successfully!",
 	})
 }
+
+func DeleteSchoolAdminAccount(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Query("id"))
+	user_id, err := strconv.Atoi(c.Query("user_id"))
+
+	schoolAdmin := models.SchoolAdmin{
+		Id: uint(id),
+	}
+
+	user := models.User{Id: uint(user_id)}
+
+	err = schoolAdminDAO.Delete(&schoolAdmin)
+
+	if err == pgx.ErrNoRows {
+		logger.Error("ERROR: %s", err)
+		c.Status(fiber.StatusNotFound)
+		return c.JSON(fiber.Map{
+			"message": "School admin not found.",
+		})
+	}
+
+	if err != nil {
+		logger.Error("ERROR: %s", err)
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(fiber.Map{
+			"message": "Unable to delete school admin, try later.",
+		})
+	}
+
+	err = userDAO.Delete(&user)
+
+	if err != nil {
+		logger.Error("ERROR: %s", err)
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(fiber.Map{
+			"message": "Unable to delete school admin, try later.",
+		})
+	}
+
+	c.Status(fiber.StatusOK)
+	return c.JSON(fiber.Map{
+		"message": "School admin deleted",
+	})
+}

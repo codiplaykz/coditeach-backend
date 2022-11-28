@@ -89,7 +89,7 @@ func (s *SchoolAdminDAO) GetById(schoolAdmin *models.SchoolAdmin) error {
 
 func (s *SchoolAdminDAO) GetBySchoolId(schoolAdmin *models.SchoolAdmin) ([]map[string]interface{}, error) {
 	rows, err := database.DB.Query(context.Background(),
-		"select * from school_admins inner join users on school_admins.user_id=users.id where school_id=$1", schoolAdmin.School_id)
+		"select s.id, s.user_id, s.school_id, u.login, u.email, r.name as role, u.name, u.surname from school_admins as s inner join users as u on s.user_id=u.id inner join roles as r on r.id=u.role_id where school_id=$1", schoolAdmin.School_id)
 
 	if err != nil {
 		s.Logger.Error("Could not get school admins")

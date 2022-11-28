@@ -47,6 +47,24 @@ func (u *UserDAO) Create(user *models.User) error {
 	return nil
 }
 
+func (u *UserDAO) Delete(user *models.User) error {
+	err := database.DB.QueryRow(context.Background(), "delete from users where id=$1 returning id", user.Id).Scan(&user.Id)
+
+	if err == pgx.ErrNoRows {
+		u.Logger.Error("User not found")
+		return err
+	}
+
+	if err != nil {
+		u.Logger.Error("Unable to user with id: %v", user.Id)
+		return err
+	}
+
+	u.Logger.Info("Deleted user with id: %v", user.Id)
+
+	return nil
+}
+
 func (u *UserDAO) GetById(user *models.User) error {
 	row := database.DB.QueryRow(context.Background(),
 		"select users.id, users.login, roles.name as role, users.password, users.name, users.surname, users.email from users inner join roles on roles.id = users.role_id where users.id = $1", user.Id)
