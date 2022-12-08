@@ -2,6 +2,7 @@ package dao
 
 import (
 	"coditeach/database"
+	"coditeach/helpers"
 	"coditeach/models"
 	"context"
 	"fmt"
@@ -15,12 +16,12 @@ type ModuleDAO struct {
 }
 
 func (m *ModuleDAO) Create(module *models.Module) error {
-	_, err := database.DB.Exec(context.Background(),
-		"insert into modules (curriculum_id, title, description, created_at) VALUES($1,$2,$3,$4)",
+	err := database.DB.QueryRow(context.Background(),
+		"insert into modules (curriculum_id, title, description, created_at) VALUES($1,$2,$3,$4) RETURNING id",
 		module.Curriculum_id,
 		module.Title,
 		module.Description,
-		time.Now())
+		time.Now()).Scan(&module.Id)
 
 	if err != nil {
 		m.Logger.Error("Unable to create module.")
@@ -98,4 +99,28 @@ func (m *ModuleDAO) GetById(module *models.Module) error {
 	}
 
 	return nil
+}
+
+func (m *ModuleDAO) GetAllByCurriculumId(curriculumId int) ([]map[string]interface{}, error) {
+	rows, err := database.DB.Query(context.Background(),
+		"select * from modules where curriculum_id=$1", curriculumId)
+
+	if err != nil {
+		m.Logger.Error("Could not get modules")
+		return nil, err
+	}
+
+	json := helpers.PgSqlRowsToJson(rows)
+
+	if err == pgx.ErrNoRows {
+		m.Logger.Error("Modules not found")
+		return nil, err
+	}
+
+	if err != nil {
+		m.Logger.Error("Unable to get modules")
+		return nil, err
+	}
+
+	return json, nil
 }

@@ -7,7 +7,7 @@ type CurriculumLesson struct {
 	Block_id    uint      `json:"block_id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	Lesson_type string    `json:"type"`
+	Duration    int       `json:"duration"`
 	Content     string    `json:"content"`
 	Created_at  time.Time `json:"created_at"`
 }

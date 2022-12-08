@@ -12,25 +12,15 @@ import (
 var curriculumLessonDAO = dao.CurriculumLessonDAO{Logger: logmatic.NewLogger()}
 
 func CreateCurriculumLesson(c *fiber.Ctx) error {
-	var data map[string]string
+	curriculumLesson := new(models.CurriculumLesson)
 
-	err := c.BodyParser(&data)
+	err := c.BodyParser(curriculumLesson)
 
 	if err != nil {
 		return err
 	}
 
-	block_id, err := strconv.Atoi(data["block_id"])
-
-	curriculumLesson := models.CurriculumLesson{
-		Block_id:    uint(block_id),
-		Title:       data["title"],
-		Description: data["description"],
-		Lesson_type: data["type"],
-		Content:     data["content"],
-	}
-
-	err = curriculumLessonDAO.Create(&curriculumLesson)
+	err = curriculumLessonDAO.Create(curriculumLesson)
 
 	if err != nil {
 		logger.Error("ERROR: %s", err)
@@ -40,18 +30,8 @@ func CreateCurriculumLesson(c *fiber.Ctx) error {
 		})
 	}
 
-	result := fiber.Map{
-		"id":          curriculumLesson.Id,
-		"block_id":    curriculumLesson.Block_id,
-		"title":       curriculumLesson.Title,
-		"description": curriculumLesson.Description,
-		"type":        curriculumLesson.Lesson_type,
-		"content":     curriculumLesson.Content,
-		"created_at":  curriculumLesson.Created_at,
-	}
-
 	c.Status(fiber.StatusCreated)
-	return c.JSON(result)
+	return c.JSON(curriculumLesson)
 }
 
 func DeleteCurriculumLesson(c *fiber.Ctx) error {
@@ -78,27 +58,15 @@ func DeleteCurriculumLesson(c *fiber.Ctx) error {
 }
 
 func UpdateCurriculumLesson(c *fiber.Ctx) error {
-	var data map[string]string
+	curriculumLesson := new(models.CurriculumLesson)
 
-	err := c.BodyParser(&data)
+	err := c.BodyParser(curriculumLesson)
 
 	if err != nil {
 		return err
 	}
 
-	id, err := strconv.Atoi(data["id"])
-	block_id, err := strconv.Atoi(data["block_id"])
-
-	curriculumLesson := models.CurriculumLesson{
-		Id:          uint(id),
-		Block_id:    uint(block_id),
-		Title:       data["title"],
-		Description: data["description"],
-		Lesson_type: data["type"],
-		Content:     data["content"],
-	}
-
-	err = curriculumLessonDAO.Update(&curriculumLesson)
+	err = curriculumLessonDAO.Update(curriculumLesson)
 
 	if err != nil {
 		logger.Error("ERROR: %s", err)
@@ -108,18 +76,8 @@ func UpdateCurriculumLesson(c *fiber.Ctx) error {
 		})
 	}
 
-	result := fiber.Map{
-		"id":          curriculumLesson.Id,
-		"block_id":    curriculumLesson.Block_id,
-		"title":       curriculumLesson.Title,
-		"description": curriculumLesson.Description,
-		"type":        curriculumLesson.Lesson_type,
-		"content":     curriculumLesson.Content,
-		"created_at":  curriculumLesson.Created_at,
-	}
-
 	c.Status(fiber.StatusAccepted)
-	return c.JSON(result)
+	return c.JSON(curriculumLesson)
 }
 
 func GetCurriculumLesson(c *fiber.Ctx) error {

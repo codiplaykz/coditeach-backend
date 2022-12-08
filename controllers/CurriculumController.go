@@ -13,24 +13,15 @@ import (
 var curriculumDAO = dao.CurriculumDAO{Logger: logmatic.NewLogger()}
 
 func CreateCurriculum(c *fiber.Ctx) error {
-	var data map[string]string
+	curriculum := new(models.Curriculum)
 
-	err := c.BodyParser(&data)
+	err := c.BodyParser(curriculum)
 
 	if err != nil {
 		return err
 	}
 
-	teacher_id, err := strconv.Atoi(data["teacher_id"])
-
-	curriculum := models.Curriculum{
-		Teacher_id:  uint(teacher_id),
-		Title:       data["title"],
-		Description: data["description"],
-		Created_at:  time.Now(),
-	}
-
-	err = curriculumDAO.Create(&curriculum)
+	err = curriculumDAO.Create(curriculum)
 
 	if err != nil {
 		logger.Error("%s", err)
@@ -40,16 +31,8 @@ func CreateCurriculum(c *fiber.Ctx) error {
 		})
 	}
 
-	result := fiber.Map{
-		"id":          curriculum.Id,
-		"teacher_id":  curriculum.Teacher_id,
-		"title":       curriculum.Title,
-		"description": curriculum.Description,
-		"created_at":  curriculum.Created_at,
-	}
-
 	c.Status(fiber.StatusCreated)
-	return c.JSON(result)
+	return c.JSON(curriculum)
 }
 
 func DeleteCurriculum(c *fiber.Ctx) error {
@@ -76,9 +59,9 @@ func DeleteCurriculum(c *fiber.Ctx) error {
 }
 
 func UpdateCurriculum(c *fiber.Ctx) error {
-	var data map[string]string
+	curriculum := new(models.Curriculum)
 
-	err := c.BodyParser(&data)
+	err := c.BodyParser(curriculum)
 
 	if err != nil {
 		logger.Error("%s", err)
@@ -88,18 +71,7 @@ func UpdateCurriculum(c *fiber.Ctx) error {
 		})
 	}
 
-	id, err := strconv.Atoi(data["id"])
-	teacher_id, err := strconv.Atoi(data["teacher_id"])
-
-	curriculum := models.Curriculum{
-		Id:          uint(id),
-		Teacher_id:  uint(teacher_id),
-		Title:       data["title"],
-		Description: data["description"],
-		Created_at:  time.Now(),
-	}
-
-	err = curriculumDAO.Update(&curriculum)
+	err = curriculumDAO.Update(curriculum)
 
 	if err == pgx.ErrNoRows {
 		logger.Error("%s", err)
@@ -117,16 +89,8 @@ func UpdateCurriculum(c *fiber.Ctx) error {
 		})
 	}
 
-	result := fiber.Map{
-		"id":          curriculum.Id,
-		"teacher_id":  curriculum.Teacher_id,
-		"title":       curriculum.Title,
-		"description": curriculum.Description,
-		"created_at":  curriculum.Created_at,
-	}
-
 	c.Status(fiber.StatusOK)
-	return c.JSON(result)
+	return c.JSON(curriculum)
 }
 
 func GetCurriculum(c *fiber.Ctx) error {
@@ -156,4 +120,169 @@ func GetCurriculum(c *fiber.Ctx) error {
 
 	c.Status(fiber.StatusOK)
 	return c.JSON(curriculum)
+}
+
+type ComposeCurriculumResponse struct {
+	User_id     int
+	Title       string
+	Description string
+	Modules     []struct {
+		Title       string
+		Description string
+		Blocks      []struct {
+			Title       string
+			Description string
+			Lessons     []struct {
+				Title       string
+				Description string
+				Duration    int
+				Content     string
+			}
+		}
+	}
+}
+
+func ComposeCurriculum(c *fiber.Ctx) error {
+	response := new(ComposeCurriculumResponse)
+
+	err := c.BodyParser(response)
+
+	if err != nil {
+		logger.Error("%s", err)
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(fiber.Map{
+			"message": "Unable to create curriculum",
+		})
+	}
+
+	curriculum := models.Curriculum{
+		User_id:     uint(response.User_id),
+		Title:       response.Title,
+		Description: response.Description,
+		Created_at:  time.Now(),
+	}
+
+	err = curriculumDAO.Create(&curriculum)
+
+	if err != nil {
+		logger.Error("%s", err)
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(fiber.Map{
+			"message": "Unable to create curriculum",
+		})
+	}
+
+	for _, module := range response.Modules {
+		moduleToInsert := models.Module{
+			Curriculum_id: curriculum.Id,
+			Title:         module.Title,
+			Description:   module.Description,
+			Created_at:    time.Now(),
+		}
+		err = moduleDAO.Create(&moduleToInsert)
+
+		if err != nil {
+			logger.Error("%s", err)
+			c.Status(fiber.StatusInternalServerError)
+			return c.JSON(fiber.Map{
+				"message": "Unable to create curriculum",
+			})
+		}
+
+		for _, block := range module.Blocks {
+			blockToInsert := models.Block{
+				Module_id:   moduleToInsert.Id,
+				Title:       block.Title,
+				Description: block.Description,
+				Created_at:  time.Now(),
+			}
+			err = blockDAO.Create(&blockToInsert)
+
+			if err != nil {
+				logger.Error("%s", err)
+				c.Status(fiber.StatusInternalServerError)
+				return c.JSON(fiber.Map{
+					"message": "Unable to create curriculum",
+				})
+			}
+
+			for _, lesson := range block.Lessons {
+				lessonToInsert := models.CurriculumLesson{
+					Block_id:    blockToInsert.Id,
+					Title:       lesson.Title,
+					Description: lesson.Description,
+					Duration:    lesson.Duration,
+					Content:     lesson.Content,
+					Created_at:  time.Now(),
+				}
+				err = curriculumLessonDAO.Create(&lessonToInsert)
+
+				if err != nil {
+					logger.Error("%s", err)
+					c.Status(fiber.StatusInternalServerError)
+					return c.JSON(fiber.Map{
+						"message": "Unable to create curriculum",
+					})
+				}
+			}
+		}
+	}
+
+	c.Status(fiber.StatusCreated)
+	return c.JSON(fiber.Map{
+		"message": "Curriculum created",
+	})
+}
+
+func GetAllFullCurriculums(c *fiber.Ctx) error {
+	curriculums, err := curriculumDAO.GetAll()
+
+	if err != nil {
+		logger.Error("ERROR: %s", err)
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(fiber.Map{
+			"message": "Unable to get projects, try later.",
+		})
+	}
+
+	for _, curriculum := range curriculums {
+		modules, err := moduleDAO.GetAllByCurriculumId(int(curriculum["id"].(int32)))
+
+		if err != nil {
+			logger.Error("ERROR: %s", err)
+			c.Status(fiber.StatusInternalServerError)
+			return c.JSON(fiber.Map{
+				"message": "Unable to get projects, try later.",
+			})
+		}
+
+		for _, module := range modules {
+			blocks, err := blockDAO.GetAllByModuleId(int(module["id"].(int32)))
+
+			if err != nil {
+				logger.Error("ERROR: %s", err)
+				c.Status(fiber.StatusInternalServerError)
+				return c.JSON(fiber.Map{
+					"message": "Unable to get projects, try later.",
+				})
+			}
+
+			for _, block := range blocks {
+				lessons, err := curriculumLessonDAO.GetAllByBlockId(int(block["id"].(int32)))
+				if err != nil {
+					logger.Error("ERROR: %s", err)
+					c.Status(fiber.StatusInternalServerError)
+					return c.JSON(fiber.Map{
+						"message": "Unable to get projects, try later.",
+					})
+				}
+				block["lessons"] = lessons
+			}
+			module["blocks"] = blocks
+		}
+
+		curriculum["modules"] = modules
+	}
+
+	return c.JSON(curriculums)
 }

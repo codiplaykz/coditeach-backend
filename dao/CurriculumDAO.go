@@ -2,6 +2,7 @@ package dao
 
 import (
 	"coditeach/database"
+	"coditeach/helpers"
 	"coditeach/models"
 	"context"
 	"github.com/jackc/pgx/v4"
@@ -15,8 +16,8 @@ type CurriculumDAO struct {
 
 func (c *CurriculumDAO) Create(curriculum *models.Curriculum) error {
 	err := database.DB.QueryRow(context.Background(),
-		"insert into curriculums (teacher_id, title, description, created_at) VALUES($1,$2,$3,$4) returning id",
-		curriculum.Teacher_id,
+		"insert into curriculums (user_id, title, description, created_at) VALUES($1,$2,$3,$4) returning id",
+		curriculum.User_id,
 		curriculum.Title,
 		curriculum.Description,
 		time.Now()).Scan(&curriculum.Id)
@@ -33,8 +34,8 @@ func (c *CurriculumDAO) Create(curriculum *models.Curriculum) error {
 
 func (c *CurriculumDAO) Update(curriculum *models.Curriculum) error {
 	err := database.DB.QueryRow(context.Background(),
-		"update curriculums set teacher_id=$1, title=$2, description=$3 where id=$4 returning id",
-		curriculum.Teacher_id,
+		"update curriculums set user_id=$1, title=$2, description=$3 where id=$4 returning id",
+		curriculum.User_id,
 		curriculum.Title,
 		curriculum.Description,
 		curriculum.Id).Scan(&curriculum.Id)
@@ -85,7 +86,7 @@ func (c *CurriculumDAO) GetById(curriculum *models.Curriculum) error {
 		"select * from curriculums where id=$1",
 		curriculum.Id)
 
-	err := row.Scan(&curriculum.Id, &curriculum.Teacher_id, &curriculum.Title, &curriculum.Description, &curriculum.Created_at)
+	err := row.Scan(&curriculum.Id, &curriculum.User_id, &curriculum.Title, &curriculum.Description, &curriculum.Created_at)
 
 	if err != nil {
 		c.Logger.Error("Unable to get curriculum with id: %s.", curriculum.Id)
@@ -93,4 +94,28 @@ func (c *CurriculumDAO) GetById(curriculum *models.Curriculum) error {
 	}
 
 	return nil
+}
+
+func (c *CurriculumDAO) GetAll() ([]map[string]interface{}, error) {
+	rows, err := database.DB.Query(context.Background(),
+		"select * from curriculums")
+
+	if err != nil {
+		c.Logger.Error("Could not get curriculums")
+		return nil, err
+	}
+
+	json := helpers.PgSqlRowsToJson(rows)
+
+	if err == pgx.ErrNoRows {
+		c.Logger.Error("Curriculums not found")
+		return nil, err
+	}
+
+	if err != nil {
+		c.Logger.Error("Unable to get curriculums")
+		return nil, err
+	}
+
+	return json, nil
 }

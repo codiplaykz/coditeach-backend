@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS STATISTICS (
 -- Curriculum tables
 CREATE TABLE IF NOT EXISTS CURRICULUMS (
     id serial not null primary key,
-    teacher_id serial references teachers (id),
+    user_id serial references users (id),
     title text not null,
     description text not null,
     created_at timestamp not null
@@ -185,6 +185,7 @@ CREATE TABLE IF NOT EXISTS BLOCKS (
     id serial not null primary key,
     module_id serial references MODULES (id),
     title text not null,
+    description text not null,
     created_at timestamp not null
 );
 
@@ -193,7 +194,7 @@ CREATE TABLE IF NOT EXISTS CURRICULUM_LESSONS (
     block_id serial references BLOCKS (id),
     title text not null,
     description text not null,
-    type text not null,
+    duration int not null,
     content text not null,
     created_at timestamp not null
 );
