@@ -23,7 +23,6 @@ func Setup(app *fiber.App) {
 			{
 				admin.Get("/getAll/students", controllers.GetAllStudents)
 				admin.Get("/getAll/teachers", controllers.GetAllTeachers)
-				admin.Get("/getAll/curriculums", controllers.GetAllFullCurriculums)
 			}
 
 			projects := v1.Group("/project", controllers.UserIdentifyMiddleware)
@@ -37,6 +36,7 @@ func Setup(app *fiber.App) {
 			{
 				//Curriculum routes
 				curriculum.Get("/get", controllers.GetCurriculum)
+				curriculum.Get("/getAll", controllers.GetAllFullCurriculums)
 				curriculum.Post("/create", controllers.CreateCurriculum)
 				curriculum.Put("/update", controllers.UpdateCurriculum)
 				curriculum.Delete("/delete", controllers.DeleteCurriculum)
@@ -121,7 +121,7 @@ func Setup(app *fiber.App) {
 				parents.Delete("api/parent/delete", controllers.DeleteParent)
 			}
 
-			subjects := v1.Group("", controllers.UserIdentifyMiddleware)
+			subjects := v1.Group("/subject", controllers.UserIdentifyMiddleware)
 			{
 				//Subject routes
 				subjects.Post("/create", controllers.CreateSubject)

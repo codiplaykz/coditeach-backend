@@ -98,7 +98,7 @@ func (c *CurriculumDAO) GetById(curriculum *models.Curriculum) error {
 
 func (c *CurriculumDAO) GetAll() ([]map[string]interface{}, error) {
 	rows, err := database.DB.Query(context.Background(),
-		"select * from curriculums")
+		"select c.id, concat(u.name, ' ', u.surname) as name, c.title, c.description, c.created_at from curriculums as c inner join users as u on c.user_id=u.id;")
 
 	if err != nil {
 		c.Logger.Error("Could not get curriculums")
