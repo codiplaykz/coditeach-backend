@@ -81,19 +81,19 @@ func (c *CurriculumDAO) Delete(curriculum *models.Curriculum) error {
 	return nil
 }
 
-func (c *CurriculumDAO) GetById(curriculum *models.Curriculum) error {
-	row := database.DB.QueryRow(context.Background(),
-		"select * from curriculums where id=$1",
-		curriculum.Id)
-
-	err := row.Scan(&curriculum.Id, &curriculum.User_id, &curriculum.Title, &curriculum.Description, &curriculum.Created_at)
+func (c *CurriculumDAO) GetById(curriculumId int) ([]map[string]interface{}, error) {
+	rows, err := database.DB.Query(context.Background(),
+		"select c.id, concat(u.name, ' ', u.surname) as name, c.title, c.description, c.created_at from curriculums as c inner join users as u on c.user_id=u.id where c.id=$1",
+		curriculumId)
 
 	if err != nil {
-		c.Logger.Error("Unable to get curriculum with id: %s.", curriculum.Id)
-		return err
+		c.Logger.Error("Unable to get curriculum with id: %s.", curriculumId)
+		return nil, err
 	}
 
-	return nil
+	json := helpers.PgSqlRowsToJson(rows)
+
+	return json, nil
 }
 
 func (c *CurriculumDAO) GetAll() ([]map[string]interface{}, error) {
